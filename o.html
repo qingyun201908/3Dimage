@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>悬浮切换3D立体卡片画廊 | 艺术空间</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background:
+                linear-gradient(135deg, rgba(255, 98, 110, 0.2), rgba(255, 190, 113, 0.2)),
+                url('/image/灰原哀1.png') center calc(50% + 100px)/cover no-repeat fixed;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            overflow-x: hidden;
+            padding: 20px;
+            perspective: 1000px;
+            transition: background 0.5s ease;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .page-title {
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .page-title h1 {
+            font-size: 3.5rem;
+            background: linear-gradient(to right, #ff7e5f, #feb47b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 15px;
+            font-weight: 700;
+            position: relative;
+            display: inline-block;
+            text-shadow: 0 0 15px rgba(255, 126, 95, 0.5);
+        }
+
+        .page-title h1:after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 4px;
+            background: linear-gradient(to right, #ff7e5f, #feb47b);
+            border-radius: 3px;
+            box-shadow: 0 0 15px rgba(255, 126, 95, 0.6);
+        }
+
+        .page-description {
+            font-size: 1.3rem;
+            max-width: 800px;
+            margin: 0 auto 40px;
+            line-height: 1.7;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        /* 卡片容器 */
+        .cards-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 60px;
+            perspective: 1200px;
+        }
+
+        /* 单个卡片样式 - 增强3D效果 */
+        .orbit-card {
+            position: relative;
+            width: 320px;
+            height: 450px;
+            transform-style: preserve-3d;
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            /* 应用默认值 */
+            --tilt-angle: 6deg;
+            /* 全局倾斜21° */
+            --card-brightness: 1.0;
+            /* 亮度1.0 */
+            --hover-tilt: 0deg;
+            filter: brightness(var(--card-brightness));
+            --shadow-intensity: 1.0;
+            /* 阴影强度100% */
+            --depth-intensity: 1.0;
+            /* 深度效果100% */
+            --mouse-rotate-x: 0deg;
+            --mouse-rotate-y: 0deg;
+            --mouse-translate-x: 0px;
+            --mouse-translate-y: 0px;
+            --highlight-intensity: 0.3;
+            /* 高光反射30% */
+            --card-opacity: 0.5;
+            /* 默认透明度0.5 */
+            animation: cardFloat 4s ease-in-out infinite;
+        }
+
+        /* 新增卡牌浮动动画 */
+        @keyframes cardFloat {
+
+            0%,
+            100% {
+                transform: translateY(0) rotateX(calc(var(--tilt-angle, 6deg))) rotateY(0deg);
+            }
+
+            50% {
+                transform: translateY(-15px) rotateX(calc(var(--tilt-angle, 6deg) * 1.1)) rotateY(5deg);
+            }
+        }
+
+        .orbit-card:hover {
+            transform: translateY(-20px) rotateX(calc(5deg * var(--depth-intensity, 1))) rotateY(calc(-5deg * var(--depth-intensity, 1)));
+            animation: none;
+        }
+
+        .orbit-card .card-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transform: translateZ(calc(30px * var(--depth-intensity, 1)));
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+        }
+
+        .orbit-card .artwork {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 20px;
+            background-size: cover;
+            background-position: center;
+            transform:
+                rotateX(calc(var(--tilt-angle) + var(--mouse-rotate-x))) rotateY(calc(var(--hover-tilt) + var(--mouse-rotate-y))) translateZ(calc(20px * var(--depth-intensity, 1))) translateX(var(--mouse-translate-x)) translateY(var(--mouse-translate-y));
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 1.8rem;
+            font-weight: 700;
+            text-shadow: 0 3px 15px rgba(0, 0, 0, calc(0.8 * var(--shadow-intensity, 1)));
+            text-align: center;
+            padding: 25px;
+            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            overflow: hidden;
+            border: 0px solid transparent;
+            box-shadow:
+                0 calc(25px * var(--shadow-intensity, 1)) calc(60px * var(--shadow-intensity, 1)) rgba(0, 0, 0, calc(0.8 * var(--shadow-intensity, 1)));
+            /* 默认透明度 */
+            opacity: var(--card-opacity);
+            transition: opacity 0.5s ease;
+            transform-style: preserve-3d;
+        }
+
+        /* 鼠标悬停时透明度为1 */
+        .orbit-card:hover .artwork {
+            opacity: 0.9;
+        }
+
+        /* 高光反射效果 */
+        .orbit-card .artwork::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 20%,
+                    rgba(255, 255, 255, calc(0.4 * var(--highlight-intensity, 0.5))),
+                    rgba(255, 255, 255, calc(0.2 * var(--highlight-intensity, 0.5))) 40%,
+                    transparent 70%);
+            border-radius: 20px;
+            pointer-events: none;
+            opacity: calc(0.8 * var(--highlight-intensity, 0.5));
+            transition: opacity 0.4s ease;
+        }
+
+        .orbit-card:hover .artwork {
+            transform:
+                rotateX(calc(var(--tilt-angle) + 5deg + var(--mouse-rotate-x))) rotateY(calc(var(--hover-tilt) + 5deg + var(--mouse-rotate-y))) translateZ(calc(30px * var(--depth-intensity, 1))) translateX(var(--mouse-translate-x)) translateY(var(--mouse-translate-y));
+            box-shadow:
+                0 calc(30px * var(--shadow-intensity, 1)) calc(70px * var(--shadow-intensity, 1)) rgba(0, 0, 0, calc(0.8 * var(--shadow-intensity, 1)));
+        }
+
+        .orbit-card .card-title {
+            position: absolute;
+            bottom: 40px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: white;
+            text-shadow: 0 3px 15px rgba(0, 0, 0, calc(0.8 * var(--shadow-intensity, 1)));
+            transform: translateZ(calc(50px * var(--depth-intensity, 1)));
+            opacity: 0;
+            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 3;
+            animation: titleFloat 3s ease-in-out infinite alternate;
+        }
+
+        /* 标题浮动效果 */
+        @keyframes titleFloat {
+            0% {
+                transform: translateY(0) translateZ(calc(50px * var(--depth-intensity, 1)));
+            }
+
+            100% {
+                transform: translateY(-5px) translateZ(calc(50px * var(--depth-intensity, 1)));
+            }
+        }
+
+        .orbit-card:hover .card-title {
+            opacity: 1;
+            bottom: 50px;
+            animation: none;
+        }
+
+        /* 3D边缘效果 */
+        .orbit-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 20px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05));
+            transform:
+                rotateX(var(--tilt-angle)) rotateY(var(--hover-tilt)) translateZ(calc(15px * var(--depth-intensity, 1)));
+            z-index: -1;
+            opacity: calc(0.7 * var(--highlight-intensity, 0.5));
+            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .orbit-card:hover::before {
+            transform:
+                rotateX(calc(var(--tilt-angle) + 5deg)) rotateY(calc(var(--hover-tilt) + 5deg)) translateZ(calc(20px * var(--depth-intensity, 1)));
+            opacity: calc(0.9 * var(--highlight-intensity, 0.5));
+        }
+
+        /* 标题消失倒计时指示器 */
+        .title-timer {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 2px;
+            overflow: hidden;
+            z-index: 4;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .title-timer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 0;
+            background: linear-gradient(to right, #ff7e5f, #feb47b);
+            transition: width 3s linear;
+        }
+
+        .orbit-card:hover .title-timer {
+            opacity: 1;
+        }
+
+        /* 状态提示 */
+        .status-indicator {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 20px;
+            color: #ffda77;
+            font-size: 1.1rem;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+            z-index: 100;
+            animation: blink 1.5s infinite alternate;
+        }
+
+        /* 状态指示器闪烁效果 */
+        @keyframes blink {
+            0% {
+                box-shadow: 0 0 5px rgba(255, 218, 119, 0.5);
+            }
+
+            100% {
+                box-shadow: 0 0 15px rgba(255, 218, 119, 0.8), 0 0 30px rgba(255, 218, 119, 0.6);
+            }
+        }
+
+        .status-indicator.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* 悬浮提示 */
+        .hover-hint {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 20px;
+            color: #ffda77;
+            font-size: 1.1rem;
+            z-index: 100;
+            text-align: center;
+            box-shadow: 0 0 15px rgba(255, 218, 119, 0.3);
+            animation: floatHint 3s ease-in-out infinite;
+        }
+
+        /* 提示浮动效果 */
+        @keyframes floatHint {
+
+            0%,
+            100% {
+                transform: translateX(-50%) translateY(0);
+            }
+
+            50% {
+                transform: translateX(-50%) translateY(-5px);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .orbit-card {
+                width: 280px;
+                height: 400px;
+            }
+
+            .page-title h1 {
+                font-size: 2.5rem;
+            }
+
+            .hover-hint {
+                width: 90%;
+                font-size: 1rem;
+                bottom: 10px;
+            }
+        }
+
+        /* =========================== */
+        /* 新增效果：悬浮卡牌时淡化其他卡牌 */
+        /* =========================== */
+        .orbit-card.faded .artwork {
+            opacity: 0 !important;
+            transition: opacity 0.5s ease !important;
+        }
+
+        /* 当前激活卡片效果 */
+        .orbit-card.active-card {
+            z-index: 10;
+            animation: none !important;
+        }
+
+        .orbit-card.active-card .artwork {
+            opacity: 1 !important;
+            transform:
+                rotateX(calc(var(--tilt-angle) + 8deg + var(--mouse-rotate-x))) rotateY(calc(var(--hover-tilt) + 8deg + var(--mouse-rotate-y))) translateZ(calc(40px * var(--depth-intensity, 1))) translateX(var(--mouse-translate-x)) translateY(var(--mouse-translate-y)) !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+
+        <div class="hover-hint">
+            <i class="fas fa-mouse-pointer"></i> 悬停在卡片上可切换背景，无操作10秒后自动重置
+        </div>
+
+        <div class="cards-container">
+            <!-- 卡片 1 -->
+            <div class="orbit-card">
+                <div class="card-image">
+                    <div class="artwork" style="background-image: url('/image/灰原哀1.png')"></div>
+                </div>
+                <div class="card-title">金发紫眸女孩</div>
+                <div class="title-timer"></div>
+            </div>
+
+            <!-- 卡片 2 -->
+            <div class="orbit-card">
+                <div class="card-image">
+                    <div class="artwork" style="background-image: url('/image/miku.d66461fc.jpeg')">
+                    </div>
+                </div>
+                <div class="card-title">银发天使</div>
+                <div class="title-timer"></div>
+            </div>
+
+            <!-- 卡片 3 -->
+            <div class="orbit-card">
+                <div class="card-image">
+                    <div class="artwork" style="background-image: url('/image/ななみ.c4dafa62.jpeg')">
+                    </div>
+                </div>
+                <div class="card-title">月光森林</div>
+                <div class="title-timer"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="status-indicator" id="statusIndicator">卡片已恢复初始状态</div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const cards = document.querySelectorAll('.orbit-card');
+            const statusIndicator = document.getElementById('statusIndicator');
+
+            // 设置默认值
+            let maxHoverTilt = 180; // 悬停倾斜180°
+            let titleTimerDuration = 30000; // 默认30秒
+            let inactivityTimer; // 无操作计时器
+            let currentBackground = '/image/灰原哀1.png'; // 当前背景
+            let resetAnimationFrame; // 重置动画帧ID
+            let isResetting = false; // 是否正在重置
+
+            // 保存初始状态
+            const initialState = {
+                tiltAngle: 6,
+                hoverTilt: 0,
+                shadowIntensity: 1.0,
+                depthIntensity: 1.0,
+                highlightIntensity: 0.3,
+                cardOpacity: 0.5,
+                background: '/image/灰原哀1.png'
+            };
+
+            // 悬浮卡片事件处理
+            function handleCardHover(e) {
+                const artwork = this.querySelector('.artwork');
+                let bgImg = artwork.style.backgroundImage;
+
+                if (bgImg) {
+                    let match = bgImg.match(/url\("?'?([^"')]+)"?'?\)/);
+                    if (match && match[1]) {
+                        const imageUrl = match[1];
+                        // 更新body的背景图片
+                        document.body.style.background =
+                            `linear-gradient(135deg, rgba(255, 98, 110, 0.2), rgba(255, 190, 113, 0.2)), 
+                            url('${imageUrl}') center calc(50% + 300px)/cover no-repeat fixed`;
+
+                        currentBackground = imageUrl;
+                        // 添加视觉效果反馈
+                        artwork.classList.add('click-effect');
+                        setTimeout(() => {
+                            artwork.classList.remove('click-effect');
+                        }, 500);
+                    }
+                }
+
+                // 重置无操作计时器
+                resetInactivityTimer();
+            }
+
+            // 为每个卡片添加悬浮事件
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', handleCardHover);
+            });
+
+            // 为每个卡片添加悬停倾斜控制和裸眼3D效果
+            cards.forEach(card => {
+                let hideTitleTimer = null;
+                const title = card.querySelector('.card-title');
+                const timerBar = card.querySelector('.title-timer');
+
+                card.addEventListener('mousemove', function (e) {
+                    const rect = this.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const percent = x / rect.width;
+
+                    // 计算悬停倾斜角度
+                    const offset = 2 * maxHoverTilt * percent - maxHoverTilt;
+                    this.style.setProperty('--hover-tilt', `${offset}deg`);
+
+                    // 裸眼3D效果
+                    const mouseX = (x - rect.width / 2) / (rect.width / 2);
+                    const mouseY = ((e.clientY - rect.top) - rect.height / 2) / (rect.height / 2);
+
+                    const maxRotate = 10;
+                    const maxShift = 5;
+
+                    const rotateY = mouseX * maxRotate;
+                    const rotateX = -mouseY * maxRotate;
+                    const translateX = mouseX * maxShift;
+                    const translateY = mouseY * maxShift;
+
+                    this.style.setProperty('--mouse-rotate-x', `${rotateX}deg`);
+                    this.style.setProperty('--mouse-rotate-y', `${rotateY}deg`);
+                    this.style.setProperty('--mouse-translate-x', `${translateX}px`);
+                    this.style.setProperty('--mouse-translate-y', `${translateY}px`);
+
+                    // 重置无操作计时器
+                    resetInactivityTimer();
+                });
+
+                // 鼠标进入卡片
+                card.addEventListener('mouseenter', function () {
+                    title.classList.remove('hidden');
+                    timerBar.style.opacity = '1';
+
+                    if (timerBar.querySelector(':before')) {
+                        timerBar.querySelector(':before').style.width = '0';
+                    }
+
+                    clearTimeout(hideTitleTimer);
+
+                    if (timerBar.querySelector(':before')) {
+                        timerBar.querySelector(':before').style.transition = `width ${titleTimerDuration / 1000}s linear`;
+                        setTimeout(() => {
+                            timerBar.querySelector(':before').style.width = '100%';
+                        }, 10);
+                    }
+
+                    hideTitleTimer = setTimeout(() => {
+                        title.classList.add('hidden');
+                        timerBar.style.opacity = '0';
+                    }, titleTimerDuration);
+
+
+                    // 添加当前卡片高亮类
+                    this.classList.add('active-card');
+
+                    // 其他所有卡片设置透明
+                    cards.forEach(otherCard => {
+                        if (otherCard !== this) {
+                            otherCard.classList.add('faded');
+                        }
+                    });
+
+
+                    // 重置无操作计时器
+                    resetInactivityTimer();
+                });
+
+                // 鼠标离开卡片
+                card.addEventListener('mouseleave', function () {
+                    clearTimeout(hideTitleTimer);
+                    title.classList.remove('hidden');
+                    timerBar.style.opacity = '0';
+
+                    // 恢复卡片浮动动画
+                    card.style.animation = 'cardFloat 4s ease-in-out infinite';
+                    const artwork = this.querySelector('.artwork');
+
+                    let bgImg = artwork.style.backgroundImage;
+
+                    if (bgImg) {
+                        let match = bgImg.match(/url\("?'?([^"')]+)"?'?\)/);
+                        if (match && match[1]) {
+                            const imageUrl = match[1];
+                            // 更新body的背景图片
+                            document.body.style.background =
+                                `linear-gradient(135deg, rgba(255, 98, 110, 0.2), rgba(255, 190, 113, 0.2)), 
+                            url('${imageUrl}') center calc(50% + 100px)/cover no-repeat fixed`;
+
+                            currentBackground = imageUrl;
+                            // 添加视觉效果反馈
+                            artwork.classList.add('click-effect');
+                            setTimeout(() => {
+                                artwork.classList.remove('click-effect');
+                            }, 500);
+                        }
+                    }
+                    // 移除当前卡片高亮
+                    this.classList.remove('active-card');
+
+                    // 移除所有卡片的透明效果
+                    cards.forEach(card => {
+                        card.classList.remove('faded');
+                    });
+                });
+            });
+
+            // 平滑重置倾斜角度
+            function smoothResetTilt(card) {
+                // 获取当前旋转角度
+                const currentRotateX = parseFloat(card.style.getPropertyValue('--mouse-rotate-x') || 0);
+                const currentRotateY = parseFloat(card.style.getPropertyValue('--mouse-rotate-y') || 0);
+
+                // 如果角度已经很小，直接设为0
+                if (Math.abs(currentRotateX) < 0.1 && Math.abs(currentRotateY) < 0.1) {
+                    card.style.setProperty('--mouse-rotate-x', '0deg');
+                    card.style.setProperty('--mouse-rotate-y', '0deg');
+                    return;
+                }
+
+                // 计算新的角度（逐步减少）
+                const newRotateX = currentRotateX * 0.9;
+                const newRotateY = currentRotateY * 0.9;
+
+                // 设置新的角度
+                card.style.setProperty('--mouse-rotate-x', `${newRotateX}deg`);
+                card.style.setProperty('--mouse-rotate-y', `${newRotateY}deg`);
+
+                // 继续动画直到角度接近0
+                resetAnimationFrame = requestAnimationFrame(() => {
+                    smoothResetTilt(card);
+                });
+            }
+
+            // 重置卡片到初始状态
+            function resetCardsToInitialState() {
+
+
+                // 停止之前的重置动画
+                if (resetAnimationFrame) {
+                    cancelAnimationFrame(resetAnimationFrame);
+                }
+
+                isResetting = true;
+
+                cards.forEach(card => {
+                    // 重置所有CSS变量为初始值
+                    card.style.setProperty('--tilt-angle', `${initialState.tiltAngle}deg`);
+                    card.style.setProperty('--hover-tilt', `${initialState.hoverTilt}deg`);
+                    card.style.setProperty('--shadow-intensity', initialState.shadowIntensity);
+                    card.style.setProperty('--depth-intensity', initialState.depthIntensity);
+                    card.style.setProperty('--highlight-intensity', initialState.highlightIntensity);
+                    card.style.setProperty('--card-opacity', initialState.cardOpacity);
+
+                    // 重置3D位移变量
+                    card.style.setProperty('--mouse-translate-x', '0px');
+                    card.style.setProperty('--mouse-translate-y', '0px');
+
+                    // 恢复卡片浮动动画
+                    card.style.animation = 'cardFloat 4s ease-in-out infinite';
+
+                    // 平滑重置倾斜角度
+                    smoothResetTilt(card);
+                });
+
+                // 显示状态提示
+                statusIndicator.classList.add('show');
+                setTimeout(() => {
+                    statusIndicator.classList.remove('show');
+                    isResetting = false;
+                }, 2000);
+            }
+
+            // 重置无操作计时器
+            function resetInactivityTimer() {
+                // 如果正在重置，不重置计时器
+                if (isResetting) return;
+
+                clearTimeout(inactivityTimer);
+                inactivityTimer = setTimeout(() => {
+                    resetCardsToInitialState();
+                }, 10000); // 设置为10秒
+            }
+
+            // 初始化无操作计时器
+            resetInactivityTimer();
+
+            // 监听页面活动
+            document.addEventListener('mousemove', resetInactivityTimer);
+            document.addEventListener('click', resetInactivityTimer);
+            document.addEventListener('keypress', resetInactivityTimer);
+
+            // 初始化卡片浮动动画
+            cards.forEach(card => {
+                card.style.animation = 'cardFloat 4s ease-in-out infinite';
+            });
+        });
+    </script>
+</body>
+
+</html>
