@@ -1,9 +1,9 @@
-# 3D立体卡片画廊 - 实现文档
+<img width="1912" height="954" alt="image" src="https://github.com/user-attachments/assets/af5a7664-c1a5-4e55-b02a-76697fe67bc7" /># 3D立体卡片画廊 - 实现文档
 
 ## 项目概述
 这个3D立体卡片画廊展示了创新的交互式卡片设计，卡片悬浮效果、3D视差变换和动态背景切换为主要特色。当用户悬停在卡片上时，会触发多种视觉效果和交互反馈。
 
-![Uploading image.png…]()
+
 
 ## 关键功能实现解析
 
